@@ -12,3 +12,4 @@ customer_app/.flutter-plugins-dependencies
 customer_app/android/.gradle/
 customer_app/android/local.properties
 customer_app/ios/Pods/
+customer_app/android/.kotlin/
