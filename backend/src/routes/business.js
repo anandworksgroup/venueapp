@@ -50,7 +50,7 @@ function bizOut(b) {
 // ── Business profile & onboarding ──
 r.get('/me', (req, res) => {
   const b = req.business;
-  if (!b) return res.json({ business: null, checklist: null, user: req.user });
+  if (!b) return res.json({ business: null, venues: [], documents: [], checklist: null, user: req.user });
   const venues = q.all('SELECT id, name, status FROM venues WHERE business_id = ?', b.id);
   const docs = q.all('SELECT id, kind, file_name, status, note, uploaded_at FROM business_documents WHERE business_id = ? ORDER BY uploaded_at DESC', b.id);
   const v = venues[0] ? q.get('SELECT * FROM venues WHERE id = ?', venues[0].id) : null;
@@ -324,7 +324,7 @@ function spaceInput(x) {
     weekend_surcharge_pct: int(x.weekend_surcharge_pct ?? 0, 'Weekend surcharge %', { max: 200 }),
     facilities: arrOf(x.facilities, 'Facilities', FACILITIES.map(([c]) => c)),
     description: str(x.description ?? '', 'Description', { min: 0, max: 1000, optional: true }) || '',
-    active: x.active === false ? 0 : 1,
+    active: x.active === false || x.active === 0 ? 0 : 1,
   };
 }
 
@@ -365,7 +365,7 @@ function packageInput(x) {
       label: str(i.label, 'Inclusion detail', { max: 120 }),
     })),
     description: str(x.description ?? '', 'Description', { min: 0, max: 1000, optional: true }) || '',
-    active: x.active === false ? 0 : 1,
+    active: x.active === false || x.active === 0 ? 0 : 1,
   };
 }
 
@@ -395,7 +395,7 @@ function serviceInput(x) {
     description: str(x.description ?? '', 'Description', { min: 0, max: 500, optional: true }) || '',
     pricing_mode: oneOf(x.pricing_mode, 'Pricing mode', ['flat', 'per_guest']),
     price: int(x.price, 'Price', { min: 1, max: 100_000_000 }),
-    active: x.active === false ? 0 : 1,
+    active: x.active === false || x.active === 0 ? 0 : 1,
   };
 }
 

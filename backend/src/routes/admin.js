@@ -370,7 +370,9 @@ r.get('/finance/summary', requirePerm('finance.read'), (_req, res) => {
     customer_deposits_held: g('CUSTOMER_DEPOSITS'),
     business_payable: g('BUSINESS_PAYABLE'),
     paid_out: q.get("SELECT COALESCE(SUM(amount),0) v FROM payouts WHERE status = 'PAID'").v,
-    gst_collected: q.get("SELECT COALESCE(SUM(tax),0) v FROM bookings WHERE paid_amount > 0 AND status NOT IN ('EXPIRED')").v,
+    // GST attributable to money actually held: tax × (paid − refunded) / total.
+    gst_collected: Math.round(q.get("SELECT COALESCE(SUM(CAST(tax AS REAL) * (paid_amount - refunded_amount) / total),0) v FROM bookings WHERE paid_amount > 0 AND total > 0").v),
+    gst_invoiced: q.get("SELECT COALESCE(SUM(tax),0) v FROM bookings WHERE paid_amount > 0 AND status NOT IN ('EXPIRED','REFUNDED')").v,
     monthly: q.all("SELECT substr(at,1,7) m, account, SUM(credit - debit) net FROM financial_ledger WHERE account IN ('PLATFORM_COMMISSION','BANK_PAYOUTS') GROUP BY m, account ORDER BY m"),
   });
 });

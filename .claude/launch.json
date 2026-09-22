@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "backend", "start"],
+      "port": 4000
+    },
+    {
+      "name": "portals",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "portals", "run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "customer-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8080", "--directory", "customer_app/build/web"],
+      "port": 8080
+    }
+  ]
+}
