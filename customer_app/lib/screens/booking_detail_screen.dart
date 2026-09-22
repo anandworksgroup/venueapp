@@ -133,7 +133,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   KeyValueRow('Total', inr(b.total), bold: true),
                   KeyValueRow('Paid', inr(b.paid), color: Brand.available),
                   if (b.refunded > 0) KeyValueRow('Refunded', inr(b.refunded), color: Brand.available),
-                  KeyValueRow('Remaining', inr(b.balance)),
+                  KeyValueRow(b.status == 'COMPLETED' ? 'Balance (settled at venue)' : 'Remaining', inr(b.balance)),
                 ]),
               ),
               const SizedBox(height: 16),
@@ -206,8 +206,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     ]),
                   ),
                 ),
-              const SectionHeader('Cancellation'),
-              Panel(
+              if (b.isLive || b.awaitingPayment || b.status == 'REQUESTED') const SectionHeader('Cancellation'),
+              if (b.isLive || b.awaitingPayment || b.status == 'REQUESTED') Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   for (final r in b.policy) KeyValueRow(r.label, r.refundPct == 0 ? 'No refund' : '${r.refundPct}% refund'),
                   if (b.cancellation['cancellable'] == true) ...[
