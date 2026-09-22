@@ -28,9 +28,16 @@ const between = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
 const round = (n, to = 1000) => Math.round(n / to) * to;
 
 export function seed({ dbPath = config.dbPath, quiet = false } = {}) {
+  // Reset in place (drop + recreate) instead of deleting the file, so seeding
+  // also works while a dev server holds the database open (Windows locks it).
   closeDb();
-  for (const f of [dbPath, `${dbPath}-wal`, `${dbPath}-shm`]) fs.rmSync(f, { force: true });
+  const db = openDb(dbPath);
+  db.exec('PRAGMA foreign_keys = OFF');
+  for (const { name } of q.all("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")) db.exec(`DROP TABLE IF EXISTS "${name}"`);
+  db.exec('PRAGMA foreign_keys = ON');
+  closeDb();
   openDb(dbPath);
+  fs.rmSync(path.join(config.storageDir, 'private', 'biz_sukh'), { recursive: true, force: true });
   invalidateAreaCache();
   s = 20260927;
   const now = nowIso();

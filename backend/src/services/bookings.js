@@ -303,7 +303,7 @@ export function verifyAndCapture({ orderId, paymentId, signature }, via = 'clien
     q.run('UPDATE venues SET booking_count = booking_count + 1 WHERE id = ?', b.venue_id);
     const venue = q.get('SELECT name FROM venues WHERE id = ?', b.venue_id);
     notifyUser(b.customer_id, 'payment_received', 'Payment received', `${inr(payment.amount)} paid for ${b.code}.`, { booking_id: b.id });
-    notifyUser(b.customer_id, 'booking_confirmed', 'Booking confirmed 🎉', `${venue.name} · ${b.event_date} · ${SLOTS[b.slot].label}. Booking ID ${b.code}.`, { booking_id: b.id });
+    notifyUser(b.customer_id, 'booking_confirmed', 'Booking confirmed', `${venue.name} · ${b.event_date} · ${SLOTS[b.slot].label}. Booking ID ${b.code}.`, { booking_id: b.id });
     notifyBusiness(b.business_id, 'new_booking', 'New booking', `${b.event_type} · ${b.event_date} · ${b.guests} guests · advance ${inr(payment.amount)} paid`, { booking_id: b.id });
     notifyBusiness(b.business_id, 'payment_received', 'Advance received', `${inr(payment.amount)} for ${b.code}.`, { booking_id: b.id });
     return { outcome: 'captured', booking: getBooking(b.id), payment: captured };
