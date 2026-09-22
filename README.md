@@ -31,7 +31,7 @@ cd backend
 npm install
 npm run seed      # fresh demo marketplace (Delhi NCR, 29 venues)
 npm start         # http://localhost:4000
-npm test          # end-to-end rules: pricing, double booking, payments, refunds, isolation, 2FA
+npm test          # end-to-end rules: pricing, double booking, payments, refunds, isolation, admin login
 ```
 
 Portals (dev): `cd portals && npm install && npm run dev` opens http://localhost:5173/business and http://localhost:5173/admin.
@@ -45,7 +45,7 @@ Customer app: `cd customer_app && flutter run -d chrome` (or an Android device).
 | Customer | phone `9876543210`. In development the OTP is returned by the API and pre-filled by the app. |
 | Business | `owner@royalgarden.in` / `Business@123` (Royal Garden Banquet) |
 | Business awaiting verification | `hello@sukhfarms.in` / `Business@123` |
-| Admin | `admin@pandal.dev` / `Admin@12345`, 2FA via `npm run totp` (TOTP secret `JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP`) |
+| Admin | `admin@pandal.dev` / `Admin@12345` (2FA is off; start the backend with `ADMIN_2FA=on` to require authenticator codes, secret `JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP`, `npm run totp`) |
 | Finance / Ops admins | `finance@pandal.dev` / `Finance@12345`, `ops@pandal.dev` / `Ops@123456` |
 
 ## Non-negotiable rules (tested in `backend/test/e2e.test.js`)
@@ -55,7 +55,7 @@ Customer app: `cd customer_app && flutter run -d chrome` (or an Android device).
 - **Server-side money.** Venue + package + services − discount + GST = total. Clients send ids, never prices.
 - **Verified payments only.** Checkout signature, a server-to-server order fetch and an amount match must all pass before a booking is CONFIRMED. Webhooks are signed, and every step is idempotent.
 - **Double-entry ledger.** Every money movement is a balanced transaction (capture, refund, commission/payable recognition, payout).
-- **Isolation and audit.** Business data is scoped to the signed-in business. Admin roles are permission-checked, admin logins need TOTP 2FA, and every admin/business mutation is audit-logged. Bank details and PAN are encrypted with AES-256-GCM.
+- **Isolation and audit.** Business data is scoped to the signed-in business. Admin roles are permission-checked, admin TOTP 2FA can be switched on with `ADMIN_2FA=on`, and every admin/business mutation is audit-logged. Bank details and PAN are encrypted with AES-256-GCM.
 
 ## MVP customer journey
 

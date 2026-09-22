@@ -175,7 +175,7 @@ r.post('/auth/otp/verify', rateLimit({ windowMs: 10 * 60_000, max: 10, name: 'ot
   res.json({ token: tokenFor(user), user: userOut(q.get('SELECT * FROM users WHERE id = ?', user.id)), is_new: isNew });
 });
 
-// Businesses and admins sign in with email + password; admins also need TOTP.
+// Businesses and admins sign in with email + password (admins also need TOTP when ADMIN_2FA=on).
 r.post('/auth/login', rateLimit({ windowMs: 15 * 60_000, max: 10, name: 'login', key: (req) => `${req.ip}:${String(req.body?.email || '').toLowerCase()}` }), (req, res) => {
   const email = str(req.body?.email, 'Email', { max: 120 }).toLowerCase();
   const password = String(req.body?.password || '');
@@ -183,7 +183,7 @@ r.post('/auth/login', rateLimit({ windowMs: 15 * 60_000, max: 10, name: 'login',
   if (!user || !verifyPassword(password, user.password_hash)) throw new HttpError(401, 'INVALID_CREDENTIALS', 'Email or password is incorrect');
   if (user.status === 'BLOCKED') throw new HttpError(403, 'BLOCKED', 'This account is blocked');
   if (req.body?.portal && req.body.portal !== user.role) throw new HttpError(403, 'WRONG_PORTAL', `This is a ${user.role} account`);
-  if (user.role === 'admin') {
+  if (user.role === 'admin' && config.adminTwoFactor) {
     if (!req.body?.totp) throw new HttpError(401, 'TOTP_REQUIRED', 'Enter the 6-digit code from your authenticator app');
     if (!verifyTotp(user.totp_secret, req.body.totp)) {
       audit({ user, ip: req.ip }, 'admin.login_failed_2fa', 'user', user.id);

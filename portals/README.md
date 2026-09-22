@@ -44,8 +44,8 @@ When `portals/dist` exists **at backend start-up**, the backend serves it at htt
 |---|---|
 | Business | `owner@royalgarden.in` / `Business@123` |
 | Business awaiting verification | `hello@sukhfarms.in` / `Business@123` |
-| Admin (super admin) | `admin@pandal.dev` / `Admin@12345` + 2FA code from `npm run totp` in `backend/` |
-| Admin (finance / ops) | `finance@pandal.dev` / `Finance@12345`, `ops@pandal.dev` / `Ops@123456` (same 2FA secret) |
+| Admin (super admin) | `admin@pandal.dev` / `Admin@12345` (no 2FA unless the backend runs with `ADMIN_2FA=on`) |
+| Admin (finance / ops) | `finance@pandal.dev` / `Finance@12345`, `ops@pandal.dev` / `Ops@123456`  |
 
 Each portal keeps its own session: the tokens are stored in `localStorage` as `pandal.business.token` and `pandal.admin.token`. A 401 from the API clears that portal's token and returns you to its login page.
 

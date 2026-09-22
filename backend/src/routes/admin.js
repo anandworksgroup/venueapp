@@ -478,8 +478,11 @@ r.post('/admins', requirePerm('*'), (req, res) => {
   const u = { id: id('usr'), role: 'admin', name: str(req.body?.name, 'Name', { max: 80 }), email, password_hash: hashPassword(password), admin_role: oneOf(req.body?.admin_role, 'Role', Object.keys(ADMIN_PERMISSIONS)), totp_secret: secret, created_at: nowIso() };
   insert('users', u);
   audit(req, 'admin.create', 'user', u.id, null, { email, admin_role: u.admin_role });
-  // The TOTP secret is shown exactly once, for the new admin to enrol.
-  res.status(201).json({ id: u.id, email, admin_role: u.admin_role, totp_secret: secret, otpauth_url: `otpauth://totp/Pandal:${encodeURIComponent(email)}?secret=${secret}&issuer=Pandal` });
+  // With 2FA on, the TOTP secret is shown exactly once, for the new admin to enrol.
+  res.status(201).json({
+    id: u.id, email, admin_role: u.admin_role,
+    ...(config.adminTwoFactor ? { totp_secret: secret, otpauth_url: `otpauth://totp/Pandal:${encodeURIComponent(email)}?secret=${secret}&issuer=Pandal` } : {}),
+  });
 });
 
 r.get('/audit-logs', requirePerm('audit.read'), (req, res) => {

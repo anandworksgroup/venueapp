@@ -43,7 +43,7 @@ VenueDetail = VenueCard + `{description, address, business_name, saved, advance_
 |---|---|---|
 | POST | `/auth/otp/request` | `{phone}` → `{sent, expires_in, dev_otp?}` (`dev_otp` only outside production) |
 | POST | `/auth/otp/verify` | `{phone, code, name?}` → `{token, user, is_new}` (customers) |
-| POST | `/auth/login` | `{email, password, totp?, portal?: 'business'\|'admin'}` → `{token, user}`. Admins must send `totp` (errors `TOTP_REQUIRED`, `TOTP_INVALID`). |
+| POST | `/auth/login` | `{email, password, totp?, portal?: 'business'\|'admin'}` → `{token, user}`. When the server runs with `ADMIN_2FA=on`, admins must also send `totp` (errors `TOTP_REQUIRED`, `TOTP_INVALID`). |
 | POST | `/auth/register-business` | `{name, email, phone, password}` → `{token, user}` |
 | GET/PATCH | `/me` | `{user}` / patch `{name?, email?, city?}` |
 

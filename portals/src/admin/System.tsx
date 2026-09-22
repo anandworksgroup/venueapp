@@ -81,11 +81,11 @@ interface AdminUser {
 export function AdminsPage() {
   const state = useAsync(() => adminApi.get<{ items: AdminUser[]; roles: Record<string, string[]> }>('/admin/admins'), []);
   const [open, setOpen] = useState(false);
-  const [created, setCreated] = useState<{ email: string; admin_role: string; totp_secret: string; otpauth_url: string } | null>(null);
+  const [created, setCreated] = useState<{ email: string; admin_role: string; totp_secret?: string; otpauth_url?: string } | null>(null);
   return (
     <>
       <PageHeader title="Admins" subtitle="People who can sign in to this portal." actions={<Button icon={Icons.plus} onClick={() => setOpen(true)}>Add admin</Button>} />
-      {created && (
+      {created && created.totp_secret && (
         <div style={{ marginBottom: 16 }}>
           <Banner tone="warning" title={`Save this now: 2FA secret for ${created.email}`} action={<Button size="sm" variant="secondary" onClick={() => setCreated(null)}>I've saved it</Button>}>
             <div className="secret-box" style={{ marginTop: 8 }}>
@@ -156,7 +156,7 @@ export function AdminsPage() {
   );
 }
 
-function CreateAdminModal({ open, roles, onClose, onCreated }: { open: boolean; roles: string[]; onClose: () => void; onCreated: (c: { email: string; admin_role: string; totp_secret: string; otpauth_url: string }) => void }) {
+function CreateAdminModal({ open, roles, onClose, onCreated }: { open: boolean; roles: string[]; onClose: () => void; onCreated: (c: { email: string; admin_role: string; totp_secret?: string; otpauth_url?: string }) => void }) {
   const [f, setF] = useState({ name: '', email: '', password: '', admin_role: 'support' });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -171,7 +171,7 @@ function CreateAdminModal({ open, roles, onClose, onCreated }: { open: boolean; 
     setPending(true);
     setError(null);
     try {
-      const r = await adminApi.post<{ email: string; admin_role: string; totp_secret: string; otpauth_url: string }>('/admin/admins', f);
+      const r = await adminApi.post<{ email: string; admin_role: string; totp_secret?: string; otpauth_url?: string }>('/admin/admins', f);
       onCreated(r);
       onClose();
     } catch (e) {
@@ -197,7 +197,7 @@ function CreateAdminModal({ open, roles, onClose, onCreated }: { open: boolean; 
         </Field>
       </div>
       <p className="muted small" style={{ marginTop: 10 }}>
-        A 2FA secret is generated and shown once after creation.
+        They sign in with this email and password.
       </p>
       <InlineError message={error} />
     </Modal>

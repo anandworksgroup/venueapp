@@ -63,20 +63,23 @@ function AdminLogin({ onLogin }: { onLogin: (t: string) => void }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totpError, setTotpError] = useState<string | null>(null);
+  // Only shown when the server has two-factor login turned on (ADMIN_2FA=on).
+  const [needsTotp, setNeedsTotp] = useState(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setTotpError(null);
-    if (!/^\d{6}$/.test(totp)) {
+    if (needsTotp && !/^\d{6}$/.test(totp)) {
       setTotpError('Enter the 6-digit code from your authenticator app');
       return;
     }
     setPending(true);
     try {
-      const r = await publicApi.post<{ token: string }>('/auth/login', { email: email.trim(), password, totp, portal: 'admin' });
+      const r = await publicApi.post<{ token: string }>('/auth/login', { email: email.trim(), password, ...(needsTotp ? { totp } : {}), portal: 'admin' });
       onLogin(r.token);
     } catch (err) {
       if (err instanceof ApiError && (err.code === 'TOTP_REQUIRED' || err.code === 'TOTP_INVALID')) {
+        setNeedsTotp(true);
         setTotpError(err.code === 'TOTP_INVALID' ? 'That code is incorrect or expired. Codes change every 30 seconds.' : err.message);
         setTotp('');
       } else setError(errMsg(err));
@@ -88,7 +91,7 @@ function AdminLogin({ onLogin }: { onLogin: (t: string) => void }) {
     <AuthShell
       tag="Keep the marketplace trustworthy: verify, settle, resolve."
       title="Admin sign in"
-      subtitle="Two-factor authentication is required."
+      subtitle="Sign in with your admin email and password."
       aside={
         <ul className="auth-points">
           <li>Every action is permission-checked and audit-logged</li>
@@ -103,10 +106,12 @@ function AdminLogin({ onLogin }: { onLogin: (t: string) => void }) {
         <Field label="Password">
           <Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </Field>
-        <Field label="2FA code" error={totpError} hint="6 digits from your authenticator app">
-          <Input className="input-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={totp} onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••" />
-        </Field>
-        {import.meta.env.DEV && (
+        {needsTotp && (
+          <Field label="2FA code" error={totpError} hint="6 digits from your authenticator app">
+            <Input className="input-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={totp} onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••" autoFocus />
+          </Field>
+        )}
+        {needsTotp && import.meta.env.DEV && (
           <div className="dev-hint">
             Dev: run <code>npm run totp</code> in <code>backend/</code> for the current code.
           </div>

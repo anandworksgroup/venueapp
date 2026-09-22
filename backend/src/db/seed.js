@@ -377,7 +377,7 @@ Accounts (development only)
                  hello@sukhfarms.in / Business@123      (awaiting verification)
   Admin        : admin@pandal.dev / Admin@12345  (super_admin)
                  finance@pandal.dev / Finance@12345, ops@pandal.dev / Ops@123456
-  Admin 2FA    : TOTP secret ${DEV_ADMIN_TOTP_SECRET}  → current code ${totpNow(DEV_ADMIN_TOTP_SECRET)}  (npm run totp)`);
+  Admin 2FA    : off (set ADMIN_2FA=on to require codes; secret ${DEV_ADMIN_TOTP_SECRET}, npm run totp)`);
   }
   return counts;
 }

@@ -33,6 +33,8 @@ export const config = {
   // 'auto' tries OpenStreetMap Nominatim and falls back to the offline gazetteer.
   geocoder: process.env.GEOCODER || 'auto',
   geocoderUserAgent: process.env.GEOCODER_UA || 'PandalDev/0.1 (local development)',
+  // Admin two-factor login (TOTP). Off unless ADMIN_2FA=on.
+  adminTwoFactor: process.env.ADMIN_2FA === 'on',
   // Development conveniences: OTP echoed back in the response.
   exposeDevOtp: !isProd,
   timezoneOffsetMinutes: 330, // IST — all event dates are Indian local dates

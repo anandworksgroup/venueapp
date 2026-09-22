@@ -1,7 +1,7 @@
 // End-to-end tests for the rules the platform must never break:
 // query understanding, real availability, server-side pricing, payment
 // verification, double-booking prevention, refunds, ledger balance,
-// business isolation and admin 2FA.
+// business isolation and admin login.
 
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -292,11 +292,21 @@ test('offline booking blocks online inventory', async () => {
   assert.equal(other.status, 409);
 });
 
-test('admin login requires a valid TOTP code and role permissions apply', async () => {
-  const noCode = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'Admin@12345' });
-  assert.equal(noCode.body.error.code, 'TOTP_REQUIRED');
-  const wrong = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'Admin@12345', totp: '000000' });
-  assert.equal(wrong.status, 401);
+test('admin login: password only by default, TOTP when ADMIN_2FA is on; role permissions apply', async () => {
+  const plain = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'Admin@12345' });
+  assert.equal(plain.status, 200, 'no 2FA code needed by default');
+  const badPw = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'wrong-password' });
+  assert.equal(badPw.status, 401);
+  const { config } = await import('../src/config.js');
+  config.adminTwoFactor = true;
+  try {
+    const noCode = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'Admin@12345' });
+    assert.equal(noCode.body.error.code, 'TOTP_REQUIRED');
+    const wrong = await api('POST', '/api/v1/auth/login', { email: 'admin@pandal.dev', password: 'Admin@12345', totp: '000000' });
+    assert.equal(wrong.status, 401);
+  } finally {
+    config.adminTwoFactor = false;
+  }
   const ops = await api('POST', '/api/v1/auth/login', { email: 'ops@pandal.dev', password: 'Ops@123456', totp: totpNow(DEV_ADMIN_TOTP_SECRET) });
   assert.equal(ops.status, 200);
   const payouts = await api('GET', '/api/v1/admin/payouts', null, ops.body.token);
