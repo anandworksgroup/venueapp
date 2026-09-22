@@ -1,0 +1,20 @@
+{
+  "name": "@pandal/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pandal core backend: location, search, availability, booking, payments & finance, notifications.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning src/main.js",
+    "dev": "node --no-warnings=ExperimentalWarning --watch src/main.js",
+    "seed": "node --no-warnings=ExperimentalWarning src/db/seed.js",
+    "totp": "node --no-warnings=ExperimentalWarning src/scripts/totp.js",
+    "test": "node --no-warnings=ExperimentalWarning --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

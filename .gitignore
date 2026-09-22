@@ -1,0 +1,14 @@
+node_modules/
+dist/
+backend/data/
+backend/storage/
+*.log
+.DS_Store
+# Flutter
+customer_app/build/
+customer_app/.dart_tool/
+customer_app/.flutter-plugins
+customer_app/.flutter-plugins-dependencies
+customer_app/android/.gradle/
+customer_app/android/local.properties
+customer_app/ios/Pods/
